@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Klangwerkstatt 🎵</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+</head>
+<body>
+
+<header>
+  <h1>🎵 Klangwerkstatt</h1>
+  <div id="transport">
+    <button id="btn-play" class="bigbtn gruen">▶️</button>
+    <button id="btn-stop" class="bigbtn rot">⏹️</button>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-screen="beat" class="aktiv">🥁 Beat</button>
+  <button data-screen="pads">🎹 Pads</button>
+  <button data-screen="sing">🎤 Singen</button>
+  <button data-screen="song">🧩 Song</button>
+</nav>
+
+<!-- ================= BEAT ================= -->
+<section id="screen-beat" class="screen aktiv">
+  <div class="karte">
+    <h2>🐢 Tempo 🐰</h2>
+    <div class="regler-zeile">
+      <span>🐢</span>
+      <input type="range" id="bpm" min="60" max="160" value="100">
+      <span>🐰</span>
+      <b id="bpm-anzeige">100</b>
+    </div>
+    <div class="regler-zeile">
+      <label for="tonart">🗝️ Tonart:</label>
+      <select id="tonart"></select>
+      <select id="tonart-art">
+        <option value="dur">🌞 fröhlich</option>
+        <option value="moll">🌙 geheimnisvoll</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h2>🥁 Dein Beat <button id="btn-clear" class="bigbtn" style="float:right;font-size:18px">🧹 leeren</button></h2>
+    <div id="spuren"></div>
+    <div class="regler-zeile">
+      <label>➕ Sound dazu:</label>
+      <select id="sound-wahl"></select>
+      <button id="btn-add-spur" class="bigbtn blau">Hinzufügen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PADS ================= -->
+<section id="screen-pads" class="screen">
+  <div class="karte">
+    <h2>🎹 Sound-Pads</h2>
+    <p class="hinweis">Tippen = abspielen. Mit 🎤⏺ nimmst du deinen eigenen Sound auf –
+       der ✨Zauber✨ schneidet ihn automatisch in den Takt!</p>
+    <div class="regler-zeile">
+      <label><input type="checkbox" id="auto-zauber" checked> ✨ Auto-Zauber nach Aufnahme</label>
+    </div>
+    <div id="pads"></div>
+  </div>
+</section>
+
+<!-- ================= SINGEN ================= -->
+<section id="screen-sing" class="screen">
+  <div class="karte" style="text-align:center">
+    <h2>🎤 Sing oder rap etwas!</h2>
+    <div class="regler-zeile" style="justify-content:center">
+      <label><input type="checkbox" id="metronom" checked> 🔔 Zählzeit</label>
+    </div>
+    <div id="sing-status" class="zaehler">🎧</div>
+    <button id="mikro-knopf" class="bigbtn rot">⏺</button>
+    <p class="hinweis">Drücken zum Aufnehmen, nochmal drücken zum Stoppen.</p>
+  </div>
+
+  <div class="karte versteckt" id="sing-ergebnis">
+    <h2>✨ Deine Stimme</h2>
+    <div class="regler-zeile">
+      <button id="btn-hoeren" class="bigbtn blau">▶️ Anhören</button>
+    </div>
+    <div class="regler-zeile">
+      <span>🐭 leise korrigieren</span>
+      <input type="range" id="tune-staerke" min="0" max="100" value="80">
+      <span>🤖 Roboter</span>
+    </div>
+    <div class="regler-zeile">
+      <button id="btn-zaubern" class="bigbtn lila">✨ Stimmen-Zauber!</button>
+      <button id="btn-speichern-pad" class="bigbtn gruen versteckt">💾 Als Sound speichern</button>
+    </div>
+    <div id="tune-info" class="sprechblase versteckt"></div>
+  </div>
+</section>
+
+<!-- ================= SONG ================= -->
+<section id="screen-song" class="screen">
+  <div class="karte">
+    <h2>🤖 Klangi, der Musik-Roboter</h2>
+    <div class="regler-zeile">
+      <input type="text" id="ki-wunsch" placeholder="Wie soll dein Song klingen? z.B. wie eine Piratenparty 🏴‍☠️"
+        style="flex:1;font-size:20px;padding:12px;border-radius:16px;border:3px solid var(--text);font-family:inherit">
+      <button id="btn-ki" class="bigbtn lila">✨ Bau mir einen Song!</button>
+    </div>
+    <div id="ki-antwort" class="sprechblase versteckt"></div>
+  </div>
+
+  <div class="karte">
+    <h2>🧩 Bausteine <span class="hinweis">(tippen = in die Song-Spur legen)</span></h2>
+    <div class="regler-zeile">
+      <button id="btn-slot-save" class="bigbtn gelb">📥 Aktuellen Beat als Baustein merken</button>
+      <select id="slot-wahl">
+        <option value="A">🟥 Baustein A</option>
+        <option value="B">🟦 Baustein B</option>
+        <option value="C">🟩 Baustein C</option>
+      </select>
+    </div>
+    <div id="bausteine"></div>
+    <h2 style="margin-top:18px">🎬 Dein Song <span class="hinweis">(Chip tippen = wegnehmen)</span></h2>
+    <div id="songspur"></div>
+    <div class="regler-zeile" style="margin-top:10px">
+      <button id="btn-song-play" class="bigbtn gruen">▶️ Song spielen</button>
+      <button id="btn-song-clear" class="bigbtn">🧹</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FX ================= -->
+<div id="fx">
+  <div class="fx-regler"><span>🌀 Echo</span><input type="range" id="fx-echo" min="0" max="100" value="20"></div>
+  <div class="fx-regler"><span>🏰 Halle</span><input type="range" id="fx-hall" min="0" max="100" value="15"></div>
+  <div class="fx-regler"><span>🤖 Roboter</span><input type="range" id="fx-robot" min="0" max="100" value="0"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

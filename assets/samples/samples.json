@@ -1,0 +1,34 @@
+[
+  {
+    "id": "kick",
+    "name": "Bumm",
+    "emoji": "🥁",
+    "kategorie": "drums",
+    "url": "assets/samples/kick.wav",
+    "color": "#ff5d5d"
+  },
+  {
+    "id": "snare",
+    "name": "Klatsch",
+    "emoji": "👏",
+    "kategorie": "drums",
+    "url": "assets/samples/snare.wav",
+    "color": "#4d9fff"
+  },
+  {
+    "id": "hat",
+    "name": "Tss",
+    "emoji": "✨",
+    "kategorie": "drums",
+    "url": "assets/samples/hat.wav",
+    "color": "#ffc93c"
+  },
+  {
+    "id": "pluck",
+    "name": "Pling",
+    "emoji": "🎹",
+    "kategorie": "melodie",
+    "url": "assets/samples/pluck.wav",
+    "color": "#3ecf8e"
+  }
+]

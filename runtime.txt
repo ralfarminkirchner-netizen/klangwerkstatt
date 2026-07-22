@@ -1,0 +1,2 @@
+# Python fuer Railway Nixpacks
+python-3.11
