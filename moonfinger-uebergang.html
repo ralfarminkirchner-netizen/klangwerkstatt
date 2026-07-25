@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moonfinger: Übergänge – MiNDLAXY</title>
+<style>
+  :root { --bg: #faf8f0; --text: #2d2a1f; --karte: #fffdf5; --rand: #d9d0b5; --akzent: #7b5ea7; --fuchs: #d47b3a; --schildkroete: #5a8a6a; --kolibri: #3a8fd4; --biber: #c4a35a; --eule: #6b5d8a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 840px; margin: 0 auto; padding: 30px 20px; line-height: 1.6; }
+  h1 { font-size: 2em; border-bottom: 3px solid var(--akzent); padding-bottom: 8px; margin-bottom: 24px; }
+  h2 { font-size: 1.3em; margin: 28px 0 12px; color: var(--akzent); }
+  .karte { background: var(--karte); border: 1px solid var(--rand); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+  .karte h3 { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .emoji { font-size: 1.4em; }
+  .beobachtung, .kontext, .perspektiven, .spannungen, .moeglichkeiten, .unsicherheiten, .entscheidung, .reentry { margin-bottom: 14px; }
+  label { display: block; font-weight: 600; margin-bottom: 4px; }
+  textarea, input[type="text"] { width: 100%; padding: 10px; border: 2px solid var(--rand); border-radius: 8px; font-family: inherit; font-size: 1rem; background: #fffef9; }
+  textarea { height: 80px; resize: vertical; }
+  .perspektive { display: inline-block; background: var(--bg); border: 2px solid var(--rand); border-radius: 10px; padding: 8px 12px; margin: 4px; font-size: .95em; }
+  .status { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: .8em; font-weight: 600; margin-left: 6px; }
+  .s-beobachtung { background: #e8e0d0; } .s-hypothese { background: #d4dce8; } .s-erfahrung { background: #d4e8d0; }
+  .s-forschung { background: #ead4e8; } .s-entscheidung { background: #e8d4b8; } .s-offen { background: #e0e0e0; }
+  .claim { font-size: .85em; color: #777; margin-top: 6px; }
+  button { padding: 12px 24px; font-size: 1.1rem; border: none; border-radius: 10px; background: var(--akzent); color: #fff; cursor: pointer; font-weight: 600; }
+  button:hover { opacity: .9; }
+  .tier { display: flex; align-items: flex-start; gap: 10px; margin: 8px 0; padding: 10px; background: var(--bg); border-radius: 8px; }
+  .tier .emoji { font-size: 1.8em; min-width: 50px; text-align: center; }
+  .ausgabe { white-space: pre-wrap; background: #f9f6f0; border: 2px dashed var(--rand); border-radius: 10px; padding: 16px; margin-top: 16px; font-size: .95em; }
+  @media print { button { display: none; } body { max-width: 100%; } }
+</style>
+</head>
+<body>
+<h1>🌙 Moonfinger: Übergänge zwischen freier Arbeit und Angebot</h1>
+<p style="color:#777;margin-bottom:24px">Ein Reflexionswerkzeug für Teams. Keine Wertung, nur Sichtbarmachung.</p>
+
+<div class="karte">
+  <h3>👁️ Beobachtung</h3>
+  <p class="claim">Claim: Beobachtung — was wurde tatsächlich gesehen?</p>
+  <textarea id="beobachtung" placeholder="Beschreibe eine konkrete Übergangssituation: Welche Kinder, welcher Zeitpunkt, was genau geschah?"></textarea>
+</div>
+
+<div class="karte">
+  <h3>🗺️ Kontext</h3>
+  <p class="claim">Claim: Beobachtung</p>
+  <textarea id="kontext" placeholder="Welche Kinder-Gruppe? Welche Tageszeit? Welche vorherige Aktivität? Welche räumlichen Bedingungen?"></textarea>
+</div>
+
+<div class="karte">
+  <h3>🔍 Perspektiven</h3>
+  <p class="claim">Claim: Hypothese / Erfahrung / Forschung — je nachdem, was diese Perspektive beisteuert.</p>
+  <div class="tier"><span class="emoji">🦊</span><div><strong>Fuchs (Pädagogik)</strong>: Was lernen wir aus dieser Situation über kindliche Entwicklung?<br><textarea id="tier-fuchs" placeholder="z.B.: Kinder brauchen Vorbereitungszeit für Übergänge, weil..."></textarea></div></div>
+  <div class="tier"><span class="emoji">🐢</span><div><strong>Schildkröte (Neurodivergenz)</strong>: Was könnte für Kinder mit ADHS/Autismus hier besonders herausfordernd sein?<br><textarea id="tier-schildkroete" placeholder="z.B.: Der Wechsel fordert exekutive Funktionen, die bei..."></textarea></div></div>
+  <div class="tier"><span class="emoji">🐦</span><div><strong>Kolibri (Organisation)</strong>: Welche organisatorischen Bedingungen wirken hier?<br><textarea id="tier-kolibri" placeholder="z.B.: Der Zeitplan erlaubt nur 3 Minuten Übergang, was bedeutet..."></textarea></div></div>
+  <div class="tier"><span class="emoji">👤</span><div><strong>Kind-Perspektive</strong>: Wie könnte sich die Situation aus Sicht eines betroffenen Kindes anfühlen?<br><textarea id="tier-kind" placeholder="z.B.: Ich war gerade so vertieft und plötzlich soll ich aufhören..."></textarea></div></div>
+  <div class="tier"><span class="emoji">⚠️</span><div><strong>Risiko-Perspektive</strong>: Welche Schäden könnten entstehen, wenn die aktuelle Praxis bleibt?<br><textarea id="tier-risiko" placeholder="z.B.: Wiederholte abrupte Übergänge könnten Vertrauen in..."></textarea></div></div>
+</div>
+
+<div class="karte">
+  <h3>⚡ Spannungen</h3>
+  <p class="claim">Claim: Hypothese — welche konkurrierenden Werte stehen im Raum?</p>
+  <textarea id="spannungen" placeholder="z.B.: Freiheit (vertieftes Arbeiten) vs. Struktur (gemeinsamer Rhythmus)"></textarea>
+</div>
+
+<div class="karte">
+  <h3>🌈 Möglichkeiten</h3>
+  <p class="claim">Claim: Hypothese — konkrete, testbare Antworten.</p>
+  <textarea id="moeglichkeiten" placeholder="z.B.: 1) Visuelle Übergangsuhr, 2) 5-Minuten-Vorwarnung mit Klangsignal, 3) Wahlfenster individueller Endzeit..."></textarea>
+</div>
+
+<div class="karte">
+  <h3>❓ Unsicherheiten</h3>
+  <p class="claim">Claim: Offen — was wissen wir noch nicht?</p>
+  <textarea id="unsicherheiten" placeholder="z.B.: Welche Kinder brauchen mehr/weniger Struktur? Ist die Uhrzeit oder die Aktivität entscheidend?"></textarea>
+</div>
+
+<div class="karte">
+  <h3>✋ Entscheidung</h3>
+  <p class="claim">Claim: Team-Entscheidung — was wird testweise verändert?</p>
+  <textarea id="entscheidung" placeholder="z.B.: Wir testen für 2 Wochen: Jedes Angebotsende wird 5 Minuten vorher mit einer Klangschale angekündigt."></textarea>
+</div>
+
+<div class="karte">
+  <h3>🔄 Re-Entry</h3>
+  <p class="claim">Claim: Offen / Beobachtung — bis wann?</p>
+  <input type="text" id="reentry" placeholder="z.B.: 15. September 2026, Team-Sitzung">
+</div>
+
+<div style="text-align:center;margin:20px 0">
+  <button onclick="erzeugeMoon()">📋 Moonfinger speichern & drucken</button>
+  <button onclick="loeschen()" style="background:#c44">🗑️ Leeren</button>
+</div>
+
+<div id="ausgabe" class="ausgabe versteckt"></div>
+
+<script>
+function erzeugeMoon() {
+  const felder = {
+    'Beobachtung': document.getElementById('beobachtung').value,
+    'Kontext': document.getElementById('kontext').value,
+    'Fuchs (Pädagogik)': document.getElementById('tier-fuchs').value,
+    'Schildkröte (Neurodivergenz)': document.getElementById('tier-schildkroete').value,
+    'Kolibri (Organisation)': document.getElementById('tier-kolibri').value,
+    'Kind-Perspektive': document.getElementById('tier-kind').value,
+    'Risiko': document.getElementById('tier-risiko').value,
+    'Spannungen': document.getElementById('spannungen').value,
+    'Möglichkeiten': document.getElementById('moeglichkeiten').value,
+    'Unsicherheiten': document.getElementById('unsicherheiten').value,
+    'Entscheidung': document.getElementById('entscheidung').value,
+    'Re-Entry': document.getElementById('reentry').value,
+  };
+  const jetzt = new Date().toISOString().slice(0,10);
+  let out = `<h2>🌙 Moonfinger: Übergänge — ${jetzt}</h2>\n`;
+  for (const [k, v] of Object.entries(felder)) {
+    out += `\n<strong>${k}</strong>\n${v || '(nicht ausgefüllt)'}\n`;
+  }
+  const el = document.getElementById('ausgabe');
+  el.innerHTML = out;
+  el.classList.remove('versteckt');
+  // localStorage
+  try { localStorage.setItem('moonfinger-uebergang', JSON.stringify({datum:jetzt, felder})); } catch(e){}
+}
+function loeschen() {
+  document.querySelectorAll('textarea, input[type="text"]').forEach(e => e.value = '');
+  document.getElementById('ausgabe').classList.add('versteckt');
+}
+// Wiederherstellen
+(function(){
+  try {
+    const d = JSON.parse(localStorage.getItem('moonfinger-uebergang'));
+    if (d && d.felder) for (const [k,v] of Object.entries(d.felder)) {
+      const el = document.querySelector(`[id]`);
+      // Mapping Felder → IDs
+      const map = {'Beobachtung':'beobachtung','Kontext':'kontext','Fuchs (Pädagogik)':'tier-fuchs','Schildkröte (Neurodivergenz)':'tier-schildkroete','Kolibri (Organisation)':'tier-kolibri','Kind-Perspektive':'tier-kind','Risiko':'tier-risiko','Spannungen':'spannungen','Möglichkeiten':'moeglichkeiten','Unsicherheiten':'unsicherheiten','Entscheidung':'entscheidung','Re-Entry':'reentry'};
+      const id = map[k];
+      if (id && v) document.getElementById(id).value = v;
+    }
+  } catch(e){}
+})();
+</script>
+</body>
+</html>
