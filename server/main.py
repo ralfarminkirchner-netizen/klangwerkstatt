@@ -111,6 +111,65 @@ def health():
             "ki": bool(os.environ.get("KIMI_API_KEY"))}
 
 
+@app.post("/api/ki/lyrics")
+async def ki_lyrics(payload: dict):
+    """Generiert Songtexte + Style-Tags aus einem Prompt (Kimi oder Fallback)."""
+    prompt = str(payload.get("prompt", ""))[:300]
+    wunsch = str(payload.get("wunsch", ""))[:200]
+    style = str(payload.get("style", "fröhlich"))
+    bpm = float(payload.get("bpm", 100))
+    key = payload.get("key", "C")
+    scale = payload.get("scale", "dur")
+
+    if os.environ.get("KIMI_API_KEY"):
+        try:
+            import requests
+            r = requests.post(
+                f"{os.environ.get('KIMI_BASE_URL', 'https://api.moonshot.ai/v1')}/chat/completions",
+                headers={"Authorization": f"Bearer {os.environ['KIMI_API_KEY']}",
+                         "Content-Type": "application/json"},
+                json={
+                    "model": os.environ.get("KIMI_MODEL", "kimi-k2.6"),
+                    "messages": [{"role": "user", "content": (
+                        f"Schreibe einen KINDERLIED-TEXT (deutsch) zu diesem Thema: {prompt}\n"
+                        f"Stil: {style}, Tempo: {bpm} BPM, Tonart: {key} {scale}.\n"
+                        f"Der Text soll 2 Strophen und einen Refrain haben. Struktur: [Strophe], [Refrain].\n"
+                        f"Reime, einfache Wörter, max 12 Zeilen. NUR den Text, keine Erklärungen.\n"
+                        f"Am Ende eine Zeile 'TAGS: tag1, tag2, tag3' mit 3 Musikstil-Tags."
+                    )}],
+                    "temperature": 0.9, "max_tokens": 500,
+                },
+                timeout=30)
+            if r.status_code == 200:
+                content = r.json()["choices"][0]["message"]["content"]
+                # Lyrics + Tags trennen
+                if "TAGS:" in content:
+                    parts = content.rsplit("TAGS:", 1)
+                    lyrics = parts[0].strip()
+                    tags = parts[1].strip()
+                else:
+                    lyrics = content.strip()
+                    tags = style.lower().replace(" ", ",")
+                return {"lyrics": lyrics, "tags": tags}
+        except Exception:
+            pass
+
+    # Fallback-Lyrics (offline)
+    return {
+        "lyrics": (
+            f"[Strophe]\n{prompt}, das ist unser Lied\n"
+            f"Wir singen laut, dass jeder es sieht\n"
+            f"Mit einem Lächeln und ganz viel Schwung\n"
+            f"So macht Musik doch jedem Jung!\n\n"
+            f"[Refrain]\nOh-oh-oh, wir singen heut\n"
+            f"Oh-oh-oh, das ist uns're Zeit\n"
+            f"Komm mach mit und tanz im Takt\n"
+            f"Bis die ganze Erde lacht!"
+        ),
+        "tags": style.lower().replace(" ", ","),
+    }
+
+
 # --- Frontend statisch ausliefern ---
 app.mount("/assets", StaticFiles(directory=ASSETS), name="assets")
 
