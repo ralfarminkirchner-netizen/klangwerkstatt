@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wissenskarten – MiNDLAXY</title>
+<style>
+  :root { --bg: #faf8f0; --text: #2d2a1f; --karte: #fffdf5; --rand: #d9d0b5; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+  h1 { border-bottom: 3px solid #5b7a9a; padding-bottom: 8px; }
+  .filter { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .filter button { padding: 6px 12px; border-radius: 8px; border: 2px solid var(--rand); background: #fff; cursor: pointer; font-size: .9em; }
+  .filter button.aktiv { background: #5b7a9a; color: #fff; border-color: #5b7a9a; }
+  .karte { background: var(--karte); border: 1px solid var(--rand); border-radius: 10px; padding: 14px; margin: 10px 0; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
+  .karte .links { font-size: .9em; }
+  .karte .status { font-size: .75em; padding: 3px 8px; border-radius: 5px; font-weight: 600; white-space: nowrap; }
+  .s-Forschungsbezug { background: #d4c8e0; }
+  .s-Team-Entscheidung { background: #d4e0c8; }
+  .s-Erfahrungswert { background: #e0d4c8; }
+  .s-Offene-Frage { background: #e0e0e0; }
+  .kern { font-weight: 600; margin: 4px 0; }
+  .quelle { color: #888; font-size: .85em; }
+  .grenze { color: #a55; font-size: .85em; margin-top: 4px; font-style: italic; }
+  .count { font-size: .9em; color: #888; }
+</style>
+</head>
+<body>
+<h1>📚 Wissenskarten</h1>
+<p>Lokaler Wissensboden — 20 Karten aus Bildungsplan, Forschung, Teamvereinbarungen, Beobachtungen und offenen Fragen.</p>
+<div class="filter" id="filter"></div>
+<p class="count" id="count"></p>
+<div id="karten"></div>
+<script>
+let alle = [];
+fetch('wissenskarten.json').then(r=>r.json()).then(data => {
+  alle = data;
+  const statuses = [...new Set(alle.map(k=>k.status))];
+  const fdiv = document.getElementById('filter');
+  statuses.forEach(s => {
+    const b = document.createElement('button');
+    b.textContent = s; b.dataset.st = s;
+    b.onclick = () => { b.classList.toggle('aktiv'); rendern(); };
+    fdiv.appendChild(b);
+  });
+  rendern();
+});
+function rendern() {
+  const aktive = [...document.querySelectorAll('.filter button.aktiv')].map(b => b.dataset.st);
+  const gefiltert = aktive.length ? alle.filter(k => aktive.includes(k.status)) : alle;
+  document.getElementById('count').textContent = `${gefiltert.length} Karten sichtbar`;
+  const box = document.getElementById('karten');
+  box.innerHTML = gefiltert.map(k => `
+    <div class="karte">
+      <div class="links">
+        <div class="kern">${k.kern}</div>
+        <div class="quelle">📌 ${k.quelle}</div>
+        ${k.grenze ? `<div class="grenze">⚠️ Grenze: ${k.grenze}</div>` : ''}
+      </div>
+      <span class="status s-${k.status.replace(/ /g,'-')}">${k.status}</span>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

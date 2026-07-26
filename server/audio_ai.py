@@ -8,13 +8,22 @@ Drei Zauber:
   3. detect_key/bpm  - Analyse-Helper.
 
 Alles lokal mit librosa/numpy - keine externen Dienste.
+
+Faellt librosa aus (z.B. Railway-Container ohne libsndfile), melden die
+Endpunkte einen freundlichen Hinweis statt abzustuerzen.
 """
 from __future__ import annotations
 
 import io
 import numpy as np
-import soundfile as sf
-import librosa
+
+AUDIO_KI = False
+try:
+    import soundfile as sf
+    import librosa
+    AUDIO_KI = True
+except ImportError:
+    pass
 
 NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "H"]
 

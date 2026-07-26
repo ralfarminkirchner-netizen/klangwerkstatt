@@ -60,6 +60,8 @@ async def audio_fit(file: UploadFile = File(...),
         return JSONResponse({"fehler": "Datei zu groß"}, status_code=413)
     try:
         y, sr = audio_ai.load_audio(data)
+        if not audio_ai.AUDIO_KI:
+            return JSONResponse({"ok": False, "fehler": "Zauber schläft - auf Railway muss libsndfile1 installiert sein"}, status_code=200)
         y2, info = audio_ai.fit_to_beat(y, sr, bpm, key, scale)
         return JSONResponse({
             "ok": True,
@@ -82,6 +84,8 @@ async def audio_tune(file: UploadFile = File(...),
         return JSONResponse({"fehler": "Datei zu groß"}, status_code=413)
     try:
         y, sr = audio_ai.load_audio(data)
+        if not audio_ai.AUDIO_KI:
+            return JSONResponse({"ok": False, "fehler": "Zauber schläft - auf Railway muss libsndfile1 installiert sein"}, status_code=200)
         if auto_key:
             key, scale = audio_ai.detect_key(y, sr)
         y2, info = audio_ai.autotune(y, sr, key, scale,
