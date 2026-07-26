@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klugschreiber – MiNDLAXY</title>
+<style>
+  :root { --bg: #faf8f0; --text: #2d2a1f; --karte: #fffdf5; --rand: #d9d0b5; --akzent: #5b7a9a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 860px; margin: 0 auto; padding: 24px 16px; line-height: 1.6; }
+  h1 { border-bottom: 3px solid var(--akzent); padding-bottom: 8px; margin-bottom: 16px; }
+  h2 { color: var(--akzent); margin: 20px 0 8px; font-size: 1.2em; }
+  .karte { background: var(--karte); border: 1px solid var(--rand); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  label { display: block; font-weight: 600; margin: 8px 0 4px; font-size: .95em; }
+  textarea, input[type="text"], select { width: 100%; padding: 10px; border: 2px solid var(--rand); border-radius: 8px; font-family: inherit; font-size: .95rem; background: #fffef9; }
+  textarea { height: 70px; resize: vertical; }
+  .claim-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+  .claim-row select { width: auto; min-width: 160px; }
+  .claim-row label { margin: 0; font-size: .85em; }
+  .persp-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  .persp-chip { padding: 6px 10px; border-radius: 8px; border: 2px solid var(--rand); cursor: pointer; background: #fff; font-size: .9em; }
+  .persp-chip.aktiv { background: var(--akzent); color: #fff; border-color: var(--akzent); }
+  button { padding: 10px 22px; font-size: 1rem; border: none; border-radius: 10px; background: var(--akzent); color: #fff; cursor: pointer; font-weight: 600; margin: 4px; }
+  .ausgabe { margin-top: 20px; padding: 18px; background: #f9f6f0; border: 2px dashed var(--rand); border-radius: 10px; white-space: pre-wrap; font-size: .9em; }
+  .versteckt { display: none; }
+  @media print { button { display: none; } }
+</style>
+</head>
+<body>
+<h1>📜 Klugschreiber</h1>
+<p style="color:#777;margin-bottom:16px">Reflexionsprotokoll — trennt Beobachtung, Deutung und Entscheidung.</p>
+
+<div class="karte">
+  <h2>1. Situation</h2>
+  <textarea id="situation" placeholder="Beschreibe die konkrete Situation: Was geschah? Wer war beteiligt? Wann und wo?"></textarea>
+</div>
+
+<div class="karte">
+  <h2>2. Deutungshypothesen</h2>
+  <div class="claim-row"><select id="claim-1" class="claim-select"><option value="beobachtung">👁️ Beobachtung</option><option value="hypothese" selected>🔍 Hypothese</option><option value="erfahrung">📚 Erfahrungswert</option><option value="forschung">🔬 Forschungsbezug</option><option value="entscheidung">✋ Team-Entscheidung</option><option value="offen">❓ Offen</option></select><label>Claim</label></div>
+  <textarea id="deutung-1" placeholder="Erste mögliche Deutung..."></textarea>
+  <div class="claim-row"><select id="claim-2" class="claim-select"><option value="beobachtung">👁️ Beobachtung</option><option value="hypothese" selected>🔍 Hypothese</option><option value="erfahrung">📚 Erfahrungswert</option><option value="forschung">🔬 Forschungsbezug</option><option value="entscheidung">✋ Team-Entscheidung</option><option value="offen">❓ Offen</option></select><label>Claim</label></div>
+  <textarea id="deutung-2" placeholder="Zweite mögliche Deutung..."></textarea>
+  <div class="claim-row"><select id="claim-3" class="claim-select"><option value="beobachtung">👁️ Beobachtung</option><option value="hypothese" selected>🔍 Hypothese</option><option value="erfahrung">📚 Erfahrungswert</option><option value="forschung">🔬 Forschungsbezug</option><option value="entscheidung">✋ Team-Entscheidung</option><option value="offen">❓ Offen</option></select><label>Claim</label></div>
+  <textarea id="deutung-3" placeholder="Dritte mögliche Deutung..."></textarea>
+</div>
+
+<div class="karte">
+  <h2>3. Fehlende Perspektiven</h2>
+  <div class="persp-row" id="persp-auswahl">
+    <span class="persp-chip" data-persp="kind">👤 Kind-Perspektive</span>
+    <span class="persp-chip" data-persp="paed">📖 Pädagogik</span>
+    <span class="persp-chip" data-persp="neuro">🧠 Neurodivergenz</span>
+    <span class="persp-chip" data-persp="org">🏫 Organisation</span>
+    <span class="persp-chip" data-persp="eltern">👨‍👩‍👧 Eltern</span>
+    <span class="persp-chip" data-persp="team">👥 Team</span>
+    <span class="persp-chip" data-persp="ethik">⚖️ Ethik</span>
+    <span class="persp-chip" data-persp="forschung">🔬 Forschung</span>
+  </div>
+  <textarea id="fehlende" placeholder="Welche Perspektive wurde noch nicht gehört? Was könnte sie beitragen?"></textarea>
+</div>
+
+<div class="karte">
+  <h2>4. Risiken & Spannungen</h2>
+  <textarea id="risiken" placeholder="Welche konkurrierenden Werte stehen im Raum? Welche zukünftigen Folgen sind denkbar, aber noch nicht sichtbar?"></textarea>
+</div>
+
+<div class="karte">
+  <h2>5. Optionen</h2>
+  <textarea id="optionen" placeholder="Welche konkreten nächsten Schritte sind denkbar? (Mehrere möglich, keine Wertung)"></textarea>
+</div>
+
+<div class="karte">
+  <h2>6. Folgenabschätzung</h2>
+  <textarea id="folgen" placeholder="Für jede Option: Was wäre die erwartete Wirkung? Für wen? In welchem Zeitraum?"></textarea>
+</div>
+
+<div class="karte">
+  <h2>7. Teamentscheidung</h2>
+  <textarea id="team-entscheidung" placeholder="Was wurde beschlossen? Von wem? Mit welcher Begründung?"></textarea>
+  <input type="text" id="reentry" placeholder="Re-Entry: Wann wird die Wirkung überprüft? (z.B. 14 Tage)">
+</div>
+
+<div style="text-align:center;margin:16px 0">
+  <button onclick="erzeugeProtokoll()">📋 Protokoll erzeugen</button>
+  <button onclick="loeschen()" style="background:#c44">🗑️ Leeren</button>
+  <button onclick="speichern()">💾 Zwischenspeichern</button>
+</div>
+
+<div id="ausgabe" class="ausgabe versteckt"></div>
+
+<script>
+const persps = [];
+document.querySelectorAll('.persp-chip').forEach(c => {
+  c.onclick = () => { c.classList.toggle('aktiv'); const v = c.dataset.persp;
+    if (c.classList.contains('aktiv')) { if (!persps.includes(v)) persps.push(v); }
+    else { const i = persps.indexOf(v); if (i >= 0) persps.splice(i,1); }
+  };
+});
+
+function erzeugeProtokoll() {
+  const f = id => document.getElementById(id).value;
+  const c = id => document.getElementById(id).value;
+  const jetzt = new Date().toISOString().slice(0,16).replace('T',' ');
+  let out = `📜 **Klugschreiber-Protokoll** — ${jetzt}\n\n`;
+  out += `## 1. Situation\n${f('situation')}\n\n`;
+  out += `## 2. Deutungen\n`;
+  for (let i=1;i<=3;i++) if (f(`deutung-${i}`)) out += `- [${c(`claim-${i}`)}] ${f(`deutung-${i}`)}\n`;
+  out += `\n## 3. Fehlende Perspektiven\nAusgewählt: ${persps.join(', ') || 'keine'}\n${f('fehlende')}\n\n`;
+  out += `## 4. Risiken & Spannungen\n${f('risiken')}\n\n`;
+  out += `## 5. Optionen\n${f('optionen')}\n\n`;
+  out += `## 6. Folgen\n${f('folgen')}\n\n`;
+  out += `## 7. Teamentscheidung\n${f('team-entscheidung')}\nRe-Entry: ${f('reentry')}`;
+  const el = document.getElementById('ausgabe');
+  el.textContent = out;
+  el.classList.remove('versteckt');
+}
+
+function speichern() {
+  const d = {}; document.querySelectorAll('textarea, input[type="text"]').forEach(e => { if (e.id) d[e.id] = e.value; });
+  d._persps = persps;
+  localStorage.setItem('klugschreiber', JSON.stringify(d));
+}
+
+function loeschen() {
+  document.querySelectorAll('textarea, input[type="text"]').forEach(e => e.value = '');
+  document.querySelectorAll('.persp-chip').forEach(c => c.classList.remove('aktiv'));
+  persps.length = 0;
+  document.getElementById('ausgabe').classList.add('versteckt');
+}
+
+(function() {
+  try {
+    const d = JSON.parse(localStorage.getItem('klugschreiber'));
+    if (d) { for (const [k,v] of Object.entries(d)) {
+      if (k === '_persps') { v.forEach(p => document.querySelector(`[data-persp="${p}"]`)?.classList.add('aktiv')); persps.push(...v); }
+      else { const el = document.getElementById(k); if (el) el.value = v; }
+    }}
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
