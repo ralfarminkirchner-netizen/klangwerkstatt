@@ -13,8 +13,12 @@ from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-import audio_ai
-import kimi_client
+try:
+    from server import audio_ai
+    from server import kimi_client
+except ImportError:
+    import audio_ai
+    import kimi_client
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
