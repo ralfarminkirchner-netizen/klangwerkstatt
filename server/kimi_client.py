@@ -1,8 +1,8 @@
-"""Klangi – der KI-Roboter der Klangwerkstatt (Kimi / Moonshot API).
+"""Klange – der KI-Engine der Klangwerkstatt.
 
-Baut Song-Ideen fuer Kinder: Schlagzeug-Muster, Arrangement-Bausteine und
-freundliche Erklaertexte. Faellt die API aus, uebernimmt ein lokaler
-Musik-Generator – die App bleibt immer benutzbar.
+Unterstuetzt DeepSeek (primaer) und Kimi/Moonshot (fallback).
+Baut Song-Ideen: Patterns, Arrangements, Erklaertexte.
+Faellt die API aus, uebernimmt ein lokaler Musik-Generator.
 """
 from __future__ import annotations
 
@@ -13,9 +13,19 @@ import re
 
 import requests
 
-BASE_URL = os.environ.get("KIMI_BASE_URL", "https://api.moonshot.ai/v1")
-API_KEY = os.environ.get("KIMI_API_KEY", "")
-MODEL = os.environ.get("KIMI_MODEL", "kimi-k2.6")
+# -- LLM provider config --
+LLM_BASE = os.environ.get("LLM_BASE_URL",
+    os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"))
+LLM_KEY = os.environ.get("LLM_API_KEY",
+    os.environ.get("DEEPSEEK_API_KEY",
+        os.environ.get("KIMI_API_KEY", "")))
+LLM_MODEL = os.environ.get("LLM_MODEL",
+    os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro"))
+
+# fallback Kimi, falls kein DeepSeek
+KIMI_BASE = os.environ.get("KIMI_BASE_URL", "https://api.moonshot.ai/v1")
+KIMI_KEY = os.environ.get("KIMI_API_KEY", "")
+KIMI_MODEL = os.environ.get("KIMI_MODEL", "kimi-k3")
 
 PROMPT = """Du bist „Klangi“, ein freundlicher Musik-Roboter fuer Kinder ab 6 Jahren.
 Ein Kind baut gerade einen Song. Tempo: {bpm} BPM, Tonart: {key} {scale}.
@@ -101,59 +111,64 @@ def _lokaler_generator(sounds: list[dict], bpm: float) -> dict:
     }
 
 
+def _llm_call(messages: list[dict], temperature: float | None = 0.9,
+              max_tokens: int = 4096, timeout: int = 60) -> dict | None:
+    """Try DeepSeek first, fall back to Kimi."""
+    for base, key, model, label in [
+        (LLM_BASE, LLM_KEY, LLM_MODEL, "deepseek"),
+        (KIMI_BASE, KIMI_KEY, KIMI_MODEL, "kimi"),
+    ]:
+        if not key:
+            continue
+        try:
+            body = {"model": model, "messages": messages,
+                    "max_tokens": max_tokens}
+            if temperature is not None:
+                body["temperature"] = temperature
+            r = requests.post(
+                f"{base}/chat/completions",
+                headers={"Authorization": f"Bearer {key}",
+                         "Content-Type": "application/json"},
+                json=body, timeout=timeout)
+            if r.status_code == 400 and temperature is not None and "temperature" in r.text:
+                body.pop("temperature", None)
+                r = requests.post(
+                    f"{base}/chat/completions",
+                    headers={"Authorization": f"Bearer {key}",
+                             "Content-Type": "application/json"},
+                    json=body, timeout=timeout)
+            r.raise_for_status()
+            text = r.json()["choices"][0]["message"]["content"]
+            data = _extract_json(text)
+            if data and "muster" in data:
+                data["quelle"] = label
+                return data
+        except Exception:
+            continue
+    return None
+
+
 def baue_song(sounds: list[dict], bpm: float, key: str, scale: str,
               wunsch: str) -> dict:
-    if not API_KEY:
+    if not (LLM_KEY or KIMI_KEY):
         return _lokaler_generator(sounds, bpm) | {"quelle": "lokal-kein-key"}
     sound_liste = "\n".join(
         f"- id={s['id']}  {s.get('emoji','🎵')} {s['name']} ({s.get('kategorie','?')})"
         for s in sounds)
-    try:
-        r = requests.post(
-            f"{BASE_URL}/chat/completions",
-            headers={"Authorization": f"Bearer {API_KEY}",
-                     "Content-Type": "application/json"},
-            json={
-                "model": MODEL,
-                "messages": [{"role": "user",
-                              "content": PROMPT.format(
-                                  bpm=bpm, key=key, scale=scale,
-                                  sounds=sound_liste, wunsch=wunsch or "Überrasch mich!")}],
-                "temperature": 0.9,
-                "max_tokens": 2000,
-            },
-            timeout=45)
-        if r.status_code == 400 and "temperature" in r.text:
-            return baue_song_retry_ohne_temp(sounds, bpm, key, scale, wunsch)
-        r.raise_for_status()
-        text = r.json()["choices"][0]["message"]["content"]
-        data = _extract_json(text)
-        if data and "muster" in data:
-            data["quelle"] = "kimi"
-            return data
-    except Exception:
-        pass
+    prompt = PROMPT.format(bpm=bpm, key=key, scale=scale,
+                           sounds=sound_liste, wunsch=wunsch or "Überrasch mich!")
+    result = _llm_call([{"role": "user", "content": prompt}])
+    if result:
+        return result
     return _lokaler_generator(sounds, bpm)
 
 
 def baue_song_retry_ohne_temp(sounds, bpm, key, scale, wunsch):
-    try:
-        r = requests.post(
-            f"{BASE_URL}/chat/completions",
-            headers={"Authorization": f"Bearer {API_KEY}"},
-            json={"model": MODEL,
-                  "messages": [{"role": "user",
-                                "content": PROMPT.format(
-                                    bpm=bpm, key=key, scale=scale,
-                                    sounds="\n".join(f"- id={s['id']} {s['name']}" for s in sounds),
-                                    wunsch=wunsch or "Überrasch mich!")}],
-                  "max_tokens": 2000},
-            timeout=45)
-        r.raise_for_status()
-        data = _extract_json(r.json()["choices"][0]["message"]["content"])
-        if data and "muster" in data:
-            data["quelle"] = "kimi"
-            return data
-    except Exception:
-        pass
+    prompt = PROMPT.format(
+        bpm=bpm, key=key, scale=scale,
+        sounds="\n".join(f"- id={s['id']} {s['name']}" for s in sounds),
+        wunsch=wunsch or "Überrasch mich!")
+    result = _llm_call([{"role": "user", "content": prompt}], temperature=None)
+    if result:
+        return result
     return _lokaler_generator(sounds, bpm)

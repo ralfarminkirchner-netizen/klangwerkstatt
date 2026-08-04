@@ -1,7 +1,21 @@
-.venv/
+# Generated index (2+ MB, rebuilt by scanner)
+shared-library/_index.json
+shared-library/shared-library/
+
+# Downloaded sample packs (3+ GB)
+shared-library/packs/
+
+# Python
 __pycache__/
 *.pyc
-.DS_Store
-node_modules/
+*.pyo
+server/.venv/
+
+# Environment
 .env
-*.log
+buzz-relay/.env
+
+# OS
+.DS_Store
+Thumbs.db
+.venv/

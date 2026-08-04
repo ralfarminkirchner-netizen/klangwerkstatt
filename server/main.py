@@ -108,12 +108,13 @@ async def audio_tune(file: UploadFile = File(...),
 @app.get("/api/health")
 def health():
     return {"status": "ok", "samples": len(_manifest()),
-            "ki": bool(os.environ.get("KIMI_API_KEY"))}
+            "deepseek": bool(os.environ.get("DEEPSEEK_API_KEY")),
+            "kimi": bool(os.environ.get("KIMI_API_KEY"))}
 
 
 @app.post("/api/ki/lyrics")
 async def ki_lyrics(payload: dict):
-    """Generiert Songtexte + Style-Tags aus einem Prompt (Kimi oder Fallback)."""
+    """Generiert Songtexte + Style-Tags (DeepSeek oder Kimi oder Fallback)."""
     prompt = str(payload.get("prompt", ""))[:300]
     wunsch = str(payload.get("wunsch", ""))[:200]
     style = str(payload.get("style", "fröhlich"))
@@ -121,15 +122,26 @@ async def ki_lyrics(payload: dict):
     key = payload.get("key", "C")
     scale = payload.get("scale", "dur")
 
-    if os.environ.get("KIMI_API_KEY"):
+    # DeepSeek zuerst, dann Kimi
+    providers = [
+        (os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
+         os.environ.get("DEEPSEEK_API_KEY", ""),
+         os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro")),
+        (os.environ.get("KIMI_BASE_URL", "https://api.moonshot.ai/v1"),
+         os.environ.get("KIMI_API_KEY", ""),
+         os.environ.get("KIMI_MODEL", "kimi-k3")),
+    ]
+    for base, api_key, model in providers:
+        if not api_key:
+            continue
         try:
             import requests
             r = requests.post(
-                f"{os.environ.get('KIMI_BASE_URL', 'https://api.moonshot.ai/v1')}/chat/completions",
-                headers={"Authorization": f"Bearer {os.environ['KIMI_API_KEY']}",
+                f"{base}/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}",
                          "Content-Type": "application/json"},
                 json={
-                    "model": os.environ.get("KIMI_MODEL", "kimi-k2.6"),
+                    "model": model,
                     "messages": [{"role": "user", "content": (
                         f"Schreibe einen KINDERLIED-TEXT (deutsch) zu diesem Thema: {prompt}\n"
                         f"Stil: {style}, Tempo: {bpm} BPM, Tonart: {key} {scale}.\n"
@@ -137,12 +149,11 @@ async def ki_lyrics(payload: dict):
                         f"Reime, einfache Wörter, max 12 Zeilen. NUR den Text, keine Erklärungen.\n"
                         f"Am Ende eine Zeile 'TAGS: tag1, tag2, tag3' mit 3 Musikstil-Tags."
                     )}],
-                    "temperature": 0.9, "max_tokens": 500,
+                    "temperature": 0.9, "max_tokens": 2048,
                 },
                 timeout=30)
             if r.status_code == 200:
                 content = r.json()["choices"][0]["message"]["content"]
-                # Lyrics + Tags trennen
                 if "TAGS:" in content:
                     parts = content.rsplit("TAGS:", 1)
                     lyrics = parts[0].strip()
@@ -152,7 +163,7 @@ async def ki_lyrics(payload: dict):
                     tags = style.lower().replace(" ", ",")
                 return {"lyrics": lyrics, "tags": tags}
         except Exception:
-            pass
+            continue
 
     # Fallback-Lyrics (offline)
     return {
